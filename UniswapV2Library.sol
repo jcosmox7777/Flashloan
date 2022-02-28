@@ -1,8 +1,8 @@
 pragma solidity >=0.5.0;
 
-import 'https://github.com/jklepatch/eattheblocks/blob/master/profitable-flashloans/update-bsc-flashloan/contracts/interfaces/IUniswapV2Pair.sol';
+import 'https://github.com/jklepatch/eattheblocks/blob/e74971499c556759757ff1d96328082092644515/profitable-flashloans/update-bsc-flashloan/contracts/interfaces/IUniswapV2Pair.sol';
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol";
+import "https://github.com/Uniswap/v2-periphery/blob/master/contracts/libraries/SafeMath.sol";
 
 library UniswapV2Library {
     using SafeMath for uint;
@@ -79,4 +79,4 @@ library UniswapV2Library {
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
-}               
+}
