@@ -1,52 +1,38 @@
-pragma solidity >=0.5.0;
+pragma solidity ^0.6.6;
 
-interface IUniswapV2Pair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/utils/SafeERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
+/**
+    Ensures that any contract that inherits from this contract is able to
+    withdraw funds that are accidentally received or stuck.
+ */
+ 
+contract Withdrawable is Ownable {
+    using SafeERC20 for ERC20;
+    address constant ETHER = address(0);
 
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
+    event LogWithdraw(
+        address indexed _from,
+        address indexed _assetAddress,
+        uint amount
     );
-    event Sync(uint112 reserve0, uint112 reserve1);
 
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
+    /**
+     * @dev Withdraw asset.
+     * @param _assetAddress Asset to be withdrawn.
+     */
+    function withdraw(address _assetAddress) public onlyOwner {
+        uint assetBalance;
+        if (_assetAddress == ETHER) {
+            address self = address(this); // workaround for a possible solidity bug
+            assetBalance = self.balance;
+            msg.sender.transfer(assetBalance);
+        } else {
+            assetBalance = ERC20(_assetAddress).balanceOf(address(this));
+            ERC20(_assetAddress).safeTransfer(msg.sender, assetBalance);
+        }
+        emit LogWithdraw(msg.sender, _assetAddress, assetBalance);
+    }
 }
