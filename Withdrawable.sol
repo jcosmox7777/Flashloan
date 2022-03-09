@@ -1,8 +1,8 @@
 pragma solidity ^0.6.6;
 
-import "../ERC20.sol";
-import "../SafeERC20.sol";
-import "../Ownable.sol";
+import "./ERC20.sol";
+import "./SafeERC20.sol";
+import "./Ownable.sol";
 
 /**
     Ensures that any contract that inherits from this contract is able to
